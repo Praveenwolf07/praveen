@@ -1,0 +1,8 @@
+{
+  "name": "AgroLink",
+  "description": "A predictive marketplace reducing post-harvest waste by matching small-scale farmers with institutional buyers using AI-driven harvest timing and automated bidding.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone"
+  ]
+}

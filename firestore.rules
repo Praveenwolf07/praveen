@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (UID)
+    // Fields:
+    //   - uid: string (required) - Firebase Auth UID
+    //   - name: string (required, size < 100) - Full name
+    //   - email: string (required, email format) - Email address
+    //   - role: string (required, enum: farmer, buyer, transporter) - User role
+    //   - location: map (optional) - Geographic location
+    //
+    // Collection: crops
+    // Document ID: cropId
+    // Fields:
+    //   - farmerId: string (required) - UID of the farmer
+    //   - type: string (required, size < 50) - Type of crop
+    //   - quantity: number (required, positive) - Quantity in kg/tons
+    //   - expectedHarvestDate: string (optional, date format) - Estimated harvest date
+    //   - status: string (required, enum: growing, ready, harvested, sold) - Current status
+    //   - location: map (optional) - Farm location
+    //   - optimalHarvestDate: string (optional, date format) - AI predicted optimal harvest date
+    //
+    // Collection: bids
+    // Document ID: bidId
+    // Fields:
+    //   - cropId: string (required) - ID of the crop
+    //   - buyerId: string (required) - UID of the buyer
+    //   - amount: number (required, positive) - Bid amount per unit
+    //   - status: string (required, enum: pending, accepted, rejected) - Bid status
+    //   - timestamp: timestamp (required) - When the bid was placed
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'name', 'email', 'role']) &&
+             data.uid == request.auth.uid &&
+             data.name is string && data.name.size() < 100 &&
+             isValidEmail(data.email) &&
+             data.role in ['farmer', 'buyer', 'transporter'];
+    }
+
+    function isValidCrop(data) {
+      return data.keys().hasAll(['farmerId', 'type', 'quantity', 'status']) &&
+             data.farmerId == request.auth.uid &&
+             data.type is string && data.type.size() < 50 &&
+             data.quantity is number && data.quantity > 0 &&
+             data.status in ['growing', 'ready', 'harvested', 'sold'];
+    }
+
+    function isValidBid(data) {
+      return data.keys().hasAll(['cropId', 'buyerId', 'farmerId', 'amount', 'status', 'timestamp']) &&
+             data.buyerId == request.auth.uid &&
+             data.amount is number && data.amount > 0 &&
+             data.status in ['pending', 'accepted', 'rejected'];
+    }
+
+    // Rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /crops/{cropId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidCrop(request.resource.data);
+      allow update: if isAuthenticated() && (
+        (resource.data.farmerId == request.auth.uid && isValidCrop(request.resource.data)) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])) // Allow status update for sales
+      );
+      allow delete: if isAuthenticated() && resource.data.farmerId == request.auth.uid;
+    }
+
+    match /bids/{bidId} {
+      allow read: if isAuthenticated() && (
+        resource.data.farmerId == request.auth.uid || 
+        resource.data.buyerId == request.auth.uid
+      );
+      allow create: if isAuthenticated() && isValidBid(request.resource.data);
+      allow update: if isAuthenticated() && (
+        (resource.data.buyerId == request.auth.uid && isValidBid(request.resource.data)) ||
+        (resource.data.farmerId == request.auth.uid && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+      );
+    }
+  }
+}

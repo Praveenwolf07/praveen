@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the HarvestOptima platform.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string", "description": "Full name" },
+        "email": { "type": "string", "description": "Email address" },
+        "role": { "type": "string", "enum": ["farmer", "buyer", "transporter"], "description": "User role" },
+        "location": { "type": "object", "description": "Geographic location" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "Crop": {
+      "title": "Crop",
+      "description": "A crop listing by a farmer.",
+      "type": "object",
+      "properties": {
+        "farmerId": { "type": "string", "description": "UID of the farmer" },
+        "type": { "type": "string", "description": "Type of crop (e.g., Tomato, Wheat)" },
+        "quantity": { "type": "number", "description": "Quantity in kg/tons" },
+        "expectedHarvestDate": { "type": "string", "format": "date", "description": "Estimated harvest date" },
+        "status": { "type": "string", "enum": ["growing", "ready", "harvested", "sold"], "description": "Current status" },
+        "location": { "type": "string", "description": "Farm location (City/Region)" },
+        "optimalHarvestDate": { "type": "string", "format": "date", "description": "AI predicted optimal harvest date" }
+      },
+      "required": ["farmerId", "type", "quantity", "status", "location"]
+    },
+    "Bid": {
+      "title": "Bid",
+      "description": "A buyer's bid for a crop.",
+      "type": "object",
+      "properties": {
+        "cropId": { "type": "string", "description": "ID of the crop" },
+        "buyerId": { "type": "string", "description": "UID of the buyer" },
+        "farmerId": { "type": "string", "description": "UID of the farmer" },
+        "buyerName": { "type": "string", "description": "Name of the buyer" },
+        "amount": { "type": "number", "description": "Bid amount per unit" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected"], "description": "Bid status" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the bid was placed" }
+      },
+      "required": ["cropId", "buyerId", "farmerId", "amount", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/crops/{cropId}": {
+      "schema": "Crop",
+      "description": "Crop listings"
+    },
+    "/bids/{bidId}": {
+      "schema": "Bid",
+      "description": "Bidding records"
+    }
+  }
+}
