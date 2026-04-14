@@ -1,1 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- Animations ---- */
+@keyframes blob {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+.animate-blob { animation: blob 7s infinite; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0fdf4 25%, #d1fae5 50%, #f0fdf4 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ---- Markdown Styles ---- */
+.markdown-body h1 { font-size: 1.5rem; font-weight: 800; color: #022c22; margin-bottom: 0.75rem; }
+.markdown-body h2 { font-size: 1.25rem; font-weight: 700; color: #022c22; margin-bottom: 0.5rem; margin-top: 1.25rem; }
+.markdown-body h3 { font-size: 1.1rem; font-weight: 600; color: #052e16; margin-bottom: 0.5rem; margin-top: 1rem; }
+.markdown-body p { color: #1a2e22; line-height: 1.7; margin-bottom: 0.75rem; }
+.markdown-body ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.markdown-body ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.markdown-body li { color: #1a2e22; line-height: 1.6; margin-bottom: 0.25rem; }
+.markdown-body strong { font-weight: 700; color: #022c22; }
+.markdown-body em { font-style: italic; color: #166534; }
+.markdown-body code { 
+  background: #f0fdf4; 
+  border: 1px solid #d1fae5;
+  border-radius: 0.375rem; 
+  padding: 0.125rem 0.375rem; 
+  font-size: 0.8em; 
+  font-family: 'JetBrains Mono', monospace;
+  color: #065f46;
+}
+.markdown-body pre {
+  background: #022c22;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+}
+.markdown-body pre code {
+  background: transparent;
+  border: none;
+  color: #6ee7b7;
+  padding: 0;
+}
+.markdown-body blockquote {
+  border-left: 3px solid #10b981;
+  padding-left: 1rem;
+  color: #065f46;
+  font-style: italic;
+  margin: 0.75rem 0;
+}
+.markdown-body a { color: #059669; text-decoration: underline; }
+.markdown-body hr { border: none; border-top: 1px solid #d1fae5; margin: 1rem 0; }
+.markdown-body table { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; }
+.markdown-body th { background: #f0fdf4; padding: 0.5rem 1rem; text-align: left; font-weight: 700; color: #022c22; border: 1px solid #d1fae5; }
+.markdown-body td { padding: 0.5rem 1rem; border: 1px solid #d1fae5; color: #1a2e22; }
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f0fdf4; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #6ee7b7; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #34d399; }
+
+/* ---- Leaflet fix ---- */
+.leaflet-container { z-index: 0 !important; }
+
+/* ---- Number input ---- */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+/* ---- Focus outline ---- */
+*:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* ---- Line clamp ---- */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---- Gradient text ---- */
+.gradient-text {
+  background: linear-gradient(135deg, #10b981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
