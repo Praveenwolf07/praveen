@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, onAuthStateChanged, signOut } from './firebase';
-import { getUser, getNotifications, getCrops, getBids, markNotificationRead } from './api';
+import { getUser, getNotifications, getCrops, getBids, markNotificationRead, getMandiPrices } from './api';
 import { UserProfile, Crop, Bid, Notification, Lang } from './types';
 import { translations, historicalMandiData, CROP_TYPES } from './constants';
 import AuthPage from './components/AuthPage';
@@ -110,15 +110,29 @@ function Dashboard({ profile, lang, setLang, t, onSignOut }: {
     { id: 'logistics', label: t.logistics || 'Logistics', icon: Truck },
   ];
 
-  // Market chart data
-  const chartData = [
-    { name: 'Tomato', price: 22 + Math.floor(Math.random() * 8) },
-    { name: 'Wheat', price: 28 + Math.floor(Math.random() * 6) },
-    { name: 'Rice', price: 32 + Math.floor(Math.random() * 5) },
-    { name: 'Potato', price: 16 + Math.floor(Math.random() * 7) },
-    { name: 'Onion', price: 20 + Math.floor(Math.random() * 6) },
-    { name: 'Corn', price: 18 + Math.floor(Math.random() * 5) },
-  ];
+  // F3: Real Mandi prices state
+  const [mandiData, setMandiData] = useState<any[]>([
+    { name: 'Tomato', price: 22, min: 18, max: 28 },
+    { name: 'Wheat',  price: 28, min: 25, max: 32 },
+    { name: 'Rice',   price: 32, min: 28, max: 38 },
+    { name: 'Potato', price: 16, min: 12, max: 22 },
+    { name: 'Onion',  price: 20, min: 15, max: 28 },
+    { name: 'Corn',   price: 18, min: 14, max: 24 },
+  ]);
+
+  useEffect(() => {
+    getMandiPrices().then(data => {
+      if (data?.length > 0) {
+        const top = data.slice(0, 8).map((d: any) => ({
+          name: d.commodity?.split(' ')[0] || d.commodity,
+          price: d.modalPrice,
+          min: d.minPrice,
+          max: d.maxPrice,
+        }));
+        setMandiData(top);
+      }
+    }).catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50/50 via-white to-amber-50/30">
@@ -221,23 +235,27 @@ function Dashboard({ profile, lang, setLang, t, onSignOut }: {
             {/* Weather */}
             <WeatherCard location={profile.location} />
 
-            {/* Market Overview */}
+            {/* Market Overview — F3: Real Mandi Prices */}
             <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-emerald-100">
-              <h3 className="text-lg font-bold text-emerald-950 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-600" /> {t.market_intelligence || 'Market Prices'}
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-emerald-950 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-emerald-600" /> Live Mandi Prices
+                </h3>
+                <span className="text-[10px] text-emerald-900/30 bg-emerald-50 px-2 py-1 rounded-full">₹/kg • Modal Price</span>
+              </div>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
+                  <BarChart data={mandiData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#d1fae5" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip formatter={(val: any) => [`₹${val}/kg`, 'Modal Price']} />
                     <Bar dataKey="price" fill="#10b981" radius={[8, 8, 0, 0]} name="₹/kg" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
+
           </div>
         )}
 

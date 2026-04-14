@@ -100,3 +100,38 @@ export async function createNotification(data: any) {
 export async function markNotificationRead(id: string) {
   return apiFetch(`/notifications/${id}`, { method: 'PUT', body: JSON.stringify({ read: true }) });
 }
+
+// ── MESSAGES (F4: In-App Messaging) ───────────────────────────────────────
+export async function getMessages(bidId: string) {
+  return apiFetch(`/messages?bidId=${bidId}`);
+}
+export async function sendMessage(data: any) {
+  return apiFetch('/messages', { method: 'POST', body: JSON.stringify(data) });
+}
+export async function markMessageRead(id: string) {
+  return apiFetch(`/messages/${id}`, { method: 'PUT', body: JSON.stringify({ read: true }) });
+}
+export async function getUnreadMessageCount(userId: string) {
+  return apiFetch(`/messages/unread-count?userId=${userId}`);
+}
+
+// ── RATINGS (F5: Reputation Score) ────────────────────────────────────────
+export async function getRatings(farmerId: string) {
+  return apiFetch(`/ratings?farmerId=${farmerId}`);
+}
+export async function createRating(data: any) {
+  return apiFetch('/ratings', { method: 'POST', body: JSON.stringify(data) });
+}
+
+// ── MANDI PRICES (F3: Real Market Prices) ─────────────────────────────────
+export async function getMandiPrices(commodity?: string, state?: string) {
+  const params = new URLSearchParams();
+  if (commodity) params.set('commodity', commodity);
+  if (state) params.set('state', state);
+  return apiFetch(`/mandi?${params}`);
+}
+
+// ── CROP DEMAND (F1: Smart Choice Engine) ─────────────────────────────────
+export async function getCropDemand() {
+  return apiFetch('/crops/demand');
+}
